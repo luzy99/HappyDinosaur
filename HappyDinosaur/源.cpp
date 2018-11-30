@@ -15,12 +15,12 @@ char keydown = '`';
 class dinosaur
 {
 private:
-	int y = 0;			//¸ß¶È
-	int v = 240;		//ËÙ¶È
-	int t = 0;			//ÆğÌøÊ±¼ä
-	int t1 = 0;			//ÏÂÂäÊ±¼ä
-	int width;			//³¤
-	int height;			//¿í
+	int y = 0;			//é«˜åº¦
+	int v = 240;		//é€Ÿåº¦
+	int t = 0;			//èµ·è·³æ—¶é—´
+	int t1 = 0;			//ä¸‹è½æ—¶é—´
+	int width;			//é•¿
+	int height;			//å®½
 public:
 
 	int gety() { return y; }
@@ -47,12 +47,12 @@ public:
 		}
 		else
 		{
-			keydown = '`';	//Çå³ı¼üÖµ
+			keydown = '`';	//æ¸…é™¤é”®å€¼
 			y = 0;
 			t = 0;
 			t1 = 0;
 		}
-		n = 0;			//´«Èë²ÎÊıĞŞ¸ÄÌùÍ¼
+		n = 0;			//ä¼ å…¥å‚æ•°ä¿®æ”¹è´´å›¾
 
 	}
 	void down(int &n)
@@ -61,11 +61,11 @@ public:
 		{
 			y += t1*t1 / 30;
 			t1++;
-			n = 0;			//´«Èë²ÎÊıĞŞ¸ÄÌùÍ¼
+			n = 0;			//ä¼ å…¥å‚æ•°ä¿®æ”¹è´´å›¾
 		}
 		else
 		{
-			keydown = '`';	//Çå³ı¼üÖµ
+			keydown = '`';	//æ¸…é™¤é”®å€¼
 			y = 0;
 			t1 = 0;
 			t = 0;
@@ -108,16 +108,16 @@ public:
 	void create(double speed)
 	{
 
-		HDC srcDC = GetImageHDC();           //´°¿Ú¾ä±ú
+		HDC srcDC = GetImageHDC();           //çª—å£å¥æŸ„
 		HDC barDC = GetImageHDC(&img);
-		TransparentBlt(srcDC, left, 330 - img.getheight(), img.getwidth(), img.getheight(), barDC, 0, 0, img.getwidth(), img.getheight(), RGB(17, 17, 102));//ÉèÖÃÍ¸Ã÷É«
+		TransparentBlt(srcDC, left, 330 - img.getheight(), img.getwidth(), img.getheight(), barDC, 0, 0, img.getwidth(), img.getheight(), RGB(17, 17, 102));//è®¾ç½®é€æ˜è‰²
 		left -= speed;
 		right = left + img.getwidth();
-		if (left <= -60)rebuild(r-30);
+		if (left <= -160)rebuild(r-30);
 	}
 	void crash(dinosaur d1)
 	{
-		if (110 - d1.gety() - d1.geth() < height)
+		if (120 - d1.gety() - d1.geth() < height)
 			if (25 < right&&left < d1.getw()-20)
 				_getch();
 
@@ -132,28 +132,28 @@ void score(double s)
 	outtextxy(10, 10, (int)(s*100));
 }
 
-void init()        //³õÊ¼»¯
+void init()        //åˆå§‹åŒ–
 {
 
-	initgraph(640, 480);							// ´°¿Ú³õÊ¼»¯´óĞ¡
-	SetWindowText(GetHWnd(), _T("HappyDinosaur"));	// ÉèÖÃ´°¿Ú±êÌâÎÄ×Ö
-	setbkcolor(WHITE);								// ÉèÖÃ±³¾°ÑÕÉ«
+	initgraph(640, 480);							// çª—å£åˆå§‹åŒ–å¤§å°
+	SetWindowText(GetHWnd(), _T("HappyDinosaur"));	// è®¾ç½®çª—å£æ ‡é¢˜æ–‡å­—
+	setbkcolor(WHITE);								// è®¾ç½®èƒŒæ™¯é¢œè‰²
 	cleardevice();
-	srand(time(0));	// ÉèÖÃËæ»úÖÖ×Ó
-	loadimage(&backimg, _T("IMAGE"), _T("background"));//¼ÓÔØ±³¾°Í¼
+	srand(time(0));	// è®¾ç½®éšæœºç§å­
+	loadimage(&backimg, _T("IMAGE"), _T("background"));//åŠ è½½èƒŒæ™¯å›¾
 
-	settextstyle(25, 0, _T("ºÚÌå"));	// ×ÖÌåÑùÊ½´óĞ¡
-	settextcolor(BLUE);					// ÉèÖÃ×ÖÌåÑÕÉ«
+	settextstyle(25, 0, _T("é»‘ä½“"));	// å­—ä½“æ ·å¼å¤§å°
+	settextcolor(BLUE);					// è®¾ç½®å­—ä½“é¢œè‰²
 
 }
 
 
-void login()		//µÇÂ¼½çÃæ
+void login()		//ç™»å½•ç•Œé¢
 {
 	dinosaur d1;
-	HDC srcDC = GetImageHDC();           //´°¿Ú¾ä±ú
-	HDC aaaDC = GetImageHDC(&dino[1]);   //Í¼Æ¬¾ä±ú
-	MOUSEMSG m;                          //Êó±êÒÆ¶¯
+	HDC srcDC = GetImageHDC();           //çª—å£å¥æŸ„
+	HDC aaaDC = GetImageHDC(&dino[1]);   //å›¾ç‰‡å¥æŸ„
+	MOUSEMSG m;                          //é¼ æ ‡ç§»åŠ¨
 
 	while (true)
 	{
@@ -163,19 +163,19 @@ void login()		//µÇÂ¼½çÃæ
 		{
 			putimage(i, 0, &backimg);
 			aaaDC = GetImageHDC(&dino[n]);
-			TransparentBlt(srcDC, 10, 230 + d1.gety(), dino[1].getwidth(), dino[1].getheight(), aaaDC, 0, 0, dino[1].getwidth(), dino[1].getheight(), RGB(17, 17, 102));//ÉèÖÃÍ¸Ã÷É«
+			TransparentBlt(srcDC, 10, 230 + d1.gety(), dino[1].getwidth(), dino[1].getheight(), aaaDC, 0, 0, dino[1].getwidth(), dino[1].getheight(), RGB(17, 17, 102));//è®¾ç½®é€æ˜è‰²
 			n = -i / 40 % 2 + 1;
 			solidrectangle(240, 100, 380, 150);
 			solidrectangle(240, 160, 380, 210);
 
-			outtextxy(260, 113, _T("¿ªÊ¼ÓÎÏ·"));
-			outtextxy(260, 173, _T("ÍË³öÓÎÏ·"));
-			outtextxy(260, 233, _T("ÓÎÏ·ËµÃ÷"));
-			if (MouseHit())						//ÅĞ¶ÏÊó±êÊÇ·ñÒÆ¶¯
-				m = GetMouseMsg();				// ¼ÇÂ¼Êó±êÎ»ÖÃ
-			if (m.x >= 240 && m.x <= 380 && m.y >= 100 && m.y <= 150)//[¿ªÊ¼ÓÎÏ·]
+			outtextxy(260, 113, _T("å¼€å§‹æ¸¸æˆ"));
+			outtextxy(260, 173, _T("é€€å‡ºæ¸¸æˆ"));
+			outtextxy(260, 233, _T("æ¸¸æˆè¯´æ˜"));
+			if (MouseHit())						//åˆ¤æ–­é¼ æ ‡æ˜¯å¦ç§»åŠ¨
+				m = GetMouseMsg();				// è®°å½•é¼ æ ‡ä½ç½®
+			if (m.x >= 240 && m.x <= 380 && m.y >= 100 && m.y <= 150)//[å¼€å§‹æ¸¸æˆ]
 			{
-				setlinecolor(RED);			// Ñ¡ÖĞ¿ò¿òÏßÌõÑÕÉ«
+				setlinecolor(RED);			// é€‰ä¸­æ¡†æ¡†çº¿æ¡é¢œè‰²
 				rectangle(235, 95, 385, 155);
 				if (m.uMsg == WM_LBUTTONDOWN)
 				{
@@ -183,18 +183,18 @@ void login()		//µÇÂ¼½çÃæ
 					game();
 				}
 			}
-			else if (m.x >= 240 && m.x <= 380 && m.y >= 160 && m.y <= 210)//[ÍË³öÓÎÏ·]
+			else if (m.x >= 240 && m.x <= 380 && m.y >= 160 && m.y <= 210)//[é€€å‡ºæ¸¸æˆ]
 			{
-				setlinecolor(RED);			// Ñ¡ÖĞ¿ò¿òÏßÌõÑÕÉ«
+				setlinecolor(RED);			// é€‰ä¸­æ¡†æ¡†çº¿æ¡é¢œè‰²
 				rectangle(235, 155, 385, 215);
 				if (m.uMsg == WM_LBUTTONDOWN)
 				{
 					exit(1);
 				}
 			}
-			else if (m.x >= 240 && m.x <= 380 && m.y >= 210 && m.y <= 260)//[ÓÎÏ·ËµÃ÷]
+			else if (m.x >= 240 && m.x <= 380 && m.y >= 210 && m.y <= 260)//[æ¸¸æˆè¯´æ˜]
 			{
-				setlinecolor(RED);			// Ñ¡ÖĞ¿ò¿òÏßÌõÑÕÉ«
+				setlinecolor(RED);			// é€‰ä¸­æ¡†æ¡†çº¿æ¡é¢œè‰²
 				rectangle(235, 215, 385, 275);
 				if (m.uMsg == WM_LBUTTONDOWN)
 				{
@@ -222,10 +222,10 @@ void game()
 	double speed = 1.5;
 	double nowtime;
 
-	HDC srcDC = GetImageHDC();           //´°¿Ú¾ä±ú
-	HDC aaaDC = GetImageHDC(&dino[1]);   //Í¼Æ¬¾ä±ú
+	HDC srcDC = GetImageHDC();           //çª—å£å¥æŸ„
+	HDC aaaDC = GetImageHDC(&dino[1]);   //å›¾ç‰‡å¥æŸ„
 	barrier bar1(0);
-	barrier bar2(350);
+	barrier bar2(400);
 	start = clock();
 	BeginBatchDraw();
 	
@@ -239,7 +239,7 @@ void game()
 			putimage(i, 0, &backimg);
 
 			if (_kbhit())
-			switch (_getch())			//¹ıÂËµôÆäËû°´¼ü
+			switch (_getch())			//è¿‡æ»¤æ‰å…¶ä»–æŒ‰é”®
 			{
 			case 'w':
 			case ' ':
@@ -251,19 +251,19 @@ void game()
 			default:
 				break;
 			}
-			if (keydown == 'w')			//°´W»ò¿Õ¸ñÌøÔ¾
+			if (keydown == 'w')			//æŒ‰Wæˆ–ç©ºæ ¼è·³è·ƒ
 			{
 				d1.jump(n);
 			}
-			else if (keydown == 's')	//°´S¿ìËÙÏÂ½µ
+			else if (keydown == 's')	//æŒ‰Så¿«é€Ÿä¸‹é™
 			{
 				d1.down(n);
 			}
 
 			aaaDC = GetImageHDC(&dino[n]);
 
-			TransparentBlt(srcDC, 10, 230 + d1.gety(), dino[1].getwidth(), dino[1].getheight(), aaaDC, 0, 0, dino[1].getwidth(), dino[1].getheight(), RGB(17, 17, 102));//ÉèÖÃÍ¸Ã÷É«
-			n = -i / 40 % 2 + 1;		//Ğ¡¿ÖÁúÌùÍ¼ÇĞ»»
+			TransparentBlt(srcDC, 10, 230 + d1.gety(), dino[1].getwidth(), dino[1].getheight(), aaaDC, 0, 0, dino[1].getwidth(), dino[1].getheight(), RGB(17, 17, 102));//è®¾ç½®é€æ˜è‰²
+			n = -i / 40 % 2 + 1;		//å°æé¾™è´´å›¾åˆ‡æ¢
 			bar1.create(speed);
 			bar2.create(speed);
 			bar1.crash(d1);
