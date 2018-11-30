@@ -5,6 +5,7 @@ compiled by VS2015 using EasyX(20180727)
 #include <graphics.h>
 #include <conio.h>
 #include <ctime>
+#include <fstream>
 #include"resource.h"
 #pragma comment(lib, "Msimg32.lib")
 
@@ -128,8 +129,11 @@ void game();
 
 void score(double s)
 {
+	TCHAR m[10] = {0};
 	settextcolor(DARKGRAY);
-	outtextxy(10, 10, (int)(s*100));
+	_stprintf_s(m, _T("%d"), int(s/20));
+	outtextxy(500, 10, _T("Score:"));
+	outtextxy(590, 10, m);
 }
 
 void init()        //初始化
@@ -221,6 +225,7 @@ void game()
 	dinosaur d1;
 	double speed = 1.5;
 	double nowtime;
+	int ss=0;
 
 	HDC srcDC = GetImageHDC();           //窗口句柄
 	HDC aaaDC = GetImageHDC(&dino[1]);   //图片句柄
@@ -269,7 +274,8 @@ void game()
 			bar1.crash(d1);
 			bar2.crash(d1);
 			nowtime = (clock() - start) / CLOCKS_PER_SEC;
-			score(nowtime);
+			ss+=1;
+			score(ss);
 			FlushBatchDraw();
 			Sleep(5);
 			
