@@ -4,13 +4,21 @@ compiled by VS2015 using EasyX(20180727)
 *****************************************/
 #include <graphics.h>
 #include <conio.h>
+#include <iostream>
 #include <ctime>
 #include <fstream>
 #include"resource.h"
 #pragma comment(lib, "Msimg32.lib")
 
-IMAGE backimg, dino[4];
-char keydown = '`';
+using namespace std;
+
+IMAGE backimg, dino[4];	
+char keydown = '`';		//键值
+int ss = 0;				//分数
+int	max_s = 0;
+
+void game();
+void game_over();
 
 
 class dinosaur
@@ -102,7 +110,7 @@ public:
 		type = rand() % 3;
 		img = barri[type];
 		left = 640+x;
-		r = rand() % 60;
+		
 		height = img.getheight();
 		x += 60;
 	}
@@ -114,26 +122,32 @@ public:
 		TransparentBlt(srcDC, left, 330 - img.getheight(), img.getwidth(), img.getheight(), barDC, 0, 0, img.getwidth(), img.getheight(), RGB(17, 17, 102));//设置透明色
 		left -= speed;
 		right = left + img.getwidth();
+		r = rand() % 80;
 		if (left <= -160)rebuild(r-30);
 	}
 	void crash(dinosaur d1)
 	{
 		if (120 - d1.gety() - d1.geth() < height)
-			if (25 < right&&left < d1.getw()-20)
-				_getch();
+			if (25 < right&&left < d1.getw() - 20)
+				game_over();
+				
 
 	}
 };
 /************************************************************************************/
-void game();
 
 void score(double s)
 {
 	TCHAR m[10] = {0};
+	TCHAR ms[10] = { 0 };
 	settextcolor(DARKGRAY);
+
 	_stprintf_s(m, _T("%d"), int(s/20));
 	outtextxy(500, 10, _T("Score:"));
 	outtextxy(590, 10, m);
+	_stprintf_s(ms, _T("%d"), max_s);
+	outtextxy(20, 10, _T("HI:"));
+	outtextxy(80, 10, ms);
 }
 
 void init()        //初始化
@@ -143,12 +157,12 @@ void init()        //初始化
 	SetWindowText(GetHWnd(), _T("HappyDinosaur"));	// 设置窗口标题文字
 	setbkcolor(WHITE);								// 设置背景颜色
 	cleardevice();
-	srand(time(0));	// 设置随机种子
+	srand(time(0));									// 设置随机种子
 	loadimage(&backimg, _T("IMAGE"), _T("background"));//加载背景图
 
 	settextstyle(25, 0, _T("黑体"));	// 字体样式大小
 	settextcolor(BLUE);					// 设置字体颜色
-
+	ss = 0;
 }
 
 
@@ -225,7 +239,7 @@ void game()
 	dinosaur d1;
 	double speed = 1.5;
 	double nowtime;
-	int ss=0;
+
 
 	HDC srcDC = GetImageHDC();           //窗口句柄
 	HDC aaaDC = GetImageHDC(&dino[1]);   //图片句柄
@@ -275,7 +289,7 @@ void game()
 			bar2.crash(d1);
 			nowtime = (clock() - start) / CLOCKS_PER_SEC;
 			ss+=1;
-			score(ss);
+			score(ss);					//显示分数
 			FlushBatchDraw();
 			Sleep(5);
 			
@@ -285,6 +299,24 @@ void game()
 				speed += 0.3;
 	}
 
+}
+
+void game_over()
+{
+	EndBatchDraw();
+	if (ss / 20>max_s)
+	{
+		max_s = ss / 20;
+		outtextxy(250, 240, _T("NEW RECORD!"));
+	}
+	score(ss);					//显示分数
+	outtextxy(260, 113, _T("GAME OVER"));
+	Sleep(1000);
+	settextstyle(20, 0, _T("黑体"));
+	outtextxy(190, 183, _T("PRESS ANY KEY TO TRY AGAIN"));
+	system("pause");
+	init();
+	login();
 }
 
 
