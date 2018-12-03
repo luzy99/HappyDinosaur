@@ -1,7 +1,7 @@
 /*****************************************
 HappyDinosaur by LZY
 compiled by VS2015 using EasyX(20180727)
-Last edited:  2018/12/02
+Last edited:  2018/12/03
 *****************************************/
 #include <graphics.h>
 #include <conio.h>
@@ -16,6 +16,7 @@ char keydown;		//键值
 char keydown2;		//键值
 int ss;				//分数
 int	max_s = 0;		//最高分
+int fire_cnt = 3;
 
 void game();
 void game_over();
@@ -149,23 +150,26 @@ private:
 	int y;
 	int right;
 	int down;
+	
 public:
+	bool flag;
 	fireball()
 	{
 		y = -100;
 		x = 80;
 		loadimage(&img, _T("IMAGE"), _T("ball"));
+		flag = 0;
 	}
 	void fire()
 	{
-
+		
 		HDC srcDC = GetImageHDC();           //窗口句柄
 		HDC ballDC = GetImageHDC(&img);
 		TransparentBlt(srcDC, x, y, img.getwidth(), img.getheight(), ballDC, 0, 0, img.getwidth(), img.getheight(), RGB(17, 17, 102));//设置透明色
 		x += 2;
-		if (x >= 640)
+		if (x >= 1080)
 		{
-			keydown2 = '`';
+			flag = 0;
 			y = -100;
 			x = 80;
 		}
@@ -191,8 +195,8 @@ private:
 	int w;
 	int right;
 	int down;
-	int bonus_x=0;
-	int bonus_y=-30;
+	int bonus_x = 0;
+	int bonus_y = -30;
 	int cnt;
 public:
 	bird()
@@ -232,7 +236,7 @@ public:
 	{
 		if (f1.getdown() > up&&f1.gety() < down&&f1.getright() > left + 10)
 		{
-			f1.setx(640);
+			f1.sety(-99);
 			f1.fire();
 			bonus_x = left;
 			bonus_y = up;
@@ -242,7 +246,7 @@ public:
 			ss += 200;
 			cnt = 0;
 		}
-		if(bonus_y > -30)					//击中显示+10分
+		if (bonus_y > -30)					//击中显示+10分
 		{
 			settextcolor(YELLOW);
 			settextstyle(40, 0, _T("Hobo Std"));
@@ -261,6 +265,7 @@ void score(double s)
 {
 	TCHAR m[10] = { 0 };
 	TCHAR ms[10] = { 0 };
+	TCHAR cnt[2] = { 0 };
 	settextcolor(DARKGRAY);
 	settextstyle(25, 0, _T("黑体"));
 	_stprintf_s(m, _T("%d"), int(s / 20));
@@ -269,6 +274,10 @@ void score(double s)
 	_stprintf_s(ms, _T("%d"), max_s);
 	outtextxy(20, 10, _T("HI:"));
 	outtextxy(80, 10, ms);
+	_stprintf_s(cnt, _T("%d"), fire_cnt);
+	settextstyle(20, 0, _T("微软雅黑"));
+	outtextxy(35, 379, _T("剩余弹药："));
+	outtextxy(100, 380, cnt);
 }
 
 //初始化
@@ -348,7 +357,7 @@ void login()
 				rectangle(235, 215, 385, 275);
 				if (m.uMsg == WM_LBUTTONDOWN)
 				{
-					flag ? flag=0 : flag=1;
+					flag = flag ? 0 : 1;
 					m.uMsg = 0;
 				}
 			}
@@ -363,7 +372,7 @@ void login()
 			{
 				settextcolor(CYAN);
 			}
-			
+
 			outtextxy(110, 380, _T("按W或空格跳跃，按S快速下降，按J攻击"));
 			FlushBatchDraw();
 			Sleep(5);
@@ -377,10 +386,12 @@ void game()
 	clock_t start;
 	dinosaur d1;
 
-	double speed = 1.5;
+	double speed = 2;
 	double nowtime;
 
 	fireball f1;
+	fireball f2;
+	fireball f3;
 	bird bird1;
 	HDC srcDC = GetImageHDC();           //窗口句柄
 	HDC aaaDC = GetImageHDC(&dino[1]);   //图片句柄
@@ -424,14 +435,26 @@ void game()
 			}
 			if (keydown2 == 'j')		//按J发射火球
 			{
-				if (f1.gety() == -100)
+				if (!f1.flag)
 				{
-					f1.setx(80);
 					f1.sety(265 + d1.gety());
+					f1.flag = 1;
 				}
-				f1.fire();
-
+				else if (!f2.flag)
+					{
+						f2.sety(265 + d1.gety());
+						f2.flag = 1;
+					}
+				else if (!f3.flag)
+				{
+					f3.sety(265 + d1.gety());
+					f3.flag = 1;
+				}
+				keydown2 = '`';
 			}
+			if (f1.flag)f1.fire();
+			if (f2.flag)f2.fire();
+			if (f3.flag)f3.fire();
 			aaaDC = GetImageHDC(&dino[n]);
 
 			TransparentBlt(srcDC, 10, 230 + d1.gety(), dino[1].getwidth(), dino[1].getheight(), aaaDC, 0, 0, dino[1].getwidth(), dino[1].getheight(), RGB(17, 17, 102));//设置透明色
@@ -444,12 +467,16 @@ void game()
 			bar2.crash(d1);				//障碍物碰撞检测
 			bird1.crash(d1);			//小鸟碰撞检测
 			bird1.kill(f1);				//小鸟击中检测
+			bird1.kill(f2);
+			bird1.kill(f3);
+
+			fire_cnt = !f1.flag + !f2.flag + !f3.flag;
 
 			nowtime = (clock() - start) / CLOCKS_PER_SEC;
 			ss += 1;
 			score(ss);					//显示分数
 
-			//_getch();
+
 			FlushBatchDraw();
 			Sleep(5);
 
@@ -464,20 +491,31 @@ void game()
 //游戏结束
 void game_over()
 {
-
 	EndBatchDraw();
 	keydown2 = '`';
+	
 	if (ss / 20 > max_s)
 	{
 		max_s = ss / 20;
+		settextstyle(25, 0, _T("黑体"));
 		outtextxy(250, 240, _T("NEW RECORD!"));
 	}
 	score(ss);					//显示分数
+	settextstyle(25, 0, _T("黑体"));
 	outtextxy(260, 113, _T("GAME OVER"));
-	Sleep(1000);
 	settextstyle(20, 0, _T("黑体"));
-	outtextxy(190, 183, _T("PRESS ANY KEY TO TRY AGAIN"));
-	system("pause");
+	FlushConsoleInputBuffer(GetStdHandle(STD_INPUT_HANDLE));	//清除按键缓存
+	while (true)
+	{
+		settextcolor(DARKGRAY);
+		outtextxy(190, 183, _T("PRESS ANY KEY TO TRY AGAIN"));
+		Sleep(400);
+		settextcolor(WHITE);
+		outtextxy(190, 183, _T("PRESS ANY KEY TO TRY AGAIN"));
+		Sleep(200);
+		if (_kbhit())break;
+	}
+	
 	init();
 	login();
 }
