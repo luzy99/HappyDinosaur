@@ -1,7 +1,7 @@
 /*****************************************
 HappyDinosaur by LZY
 compiled by VS2015 using EasyX(20180727)
-Last edited:  2018/12/03
+Last edited:  2018/12/02
 *****************************************/
 #include <graphics.h>
 #include <conio.h>
@@ -11,12 +11,13 @@ Last edited:  2018/12/03
 #pragma comment(lib, "Msimg32.lib")
 
 
-IMAGE backimg, dino[4];
+IMAGE backimg, dino[6];
 char keydown;		//键值
 char keydown2;		//键值
 int ss;				//分数
 int	max_s = 0;		//最高分
-int fire_cnt = 3;
+int fire_cnt = 3;	//火球计数
+bool gamemode = 0;
 
 void game();
 void game_over();
@@ -45,6 +46,8 @@ public:
 		loadimage(&dino[1], _T("IMAGE"), _T("dino1"));
 		loadimage(&dino[2], _T("IMAGE"), _T("dino2"));
 		loadimage(&dino[3], _T("IMAGE"), _T("dino3"));
+		loadimage(&dino[4], _T("IMAGE"), _T("dino2_1"));
+		loadimage(&dino[5], _T("IMAGE"), _T("dino1_1"));
 		width = dino[0].getwidth();
 		height = dino[0].getheight();
 	}
@@ -62,7 +65,8 @@ public:
 			t = 0;
 			t1 = 0;
 		}
-		n = 0;			//传入参数修改贴图
+		if (n != 4 && n != 5)
+			n = 0;			//传入参数修改贴图
 
 	}
 	void down(int &n)
@@ -92,7 +96,6 @@ private:
 	double left;
 	int right;
 	int height;
-	int v;
 	int type;
 	IMAGE barri[3];
 	IMAGE img;
@@ -150,7 +153,7 @@ private:
 	int y;
 	int right;
 	int down;
-	
+
 public:
 	bool flag;
 	fireball()
@@ -162,7 +165,7 @@ public:
 	}
 	void fire()
 	{
-		
+
 		HDC srcDC = GetImageHDC();           //窗口句柄
 		HDC ballDC = GetImageHDC(&img);
 		TransparentBlt(srcDC, x, y, img.getwidth(), img.getheight(), ballDC, 0, 0, img.getwidth(), img.getheight(), RGB(17, 17, 102));//设置透明色
@@ -258,6 +261,95 @@ public:
 	}
 };
 
+//道具
+class item
+{
+private:
+	double left;
+	int right;
+	int height;
+	int type;
+	IMAGE img;
+	clock_t start;
+	int r;
+public:
+	int gamemode;
+	item()
+	{
+		rebuild();
+		left = -50;
+		height = img.getheight();
+		gamemode = 0;
+	}
+	void rebuild()
+	{
+		type = 1 + rand() % 2;
+		if (type == 1)
+			loadimage(&img, _T("IMAGE"), _T("poison"));
+		else
+			loadimage(&img, _T("IMAGE"), _T("star"));
+	}
+	void create(double speed)
+	{
+
+		HDC srcDC = GetImageHDC();           //窗口句柄
+		HDC barDC = GetImageHDC(&img);
+		TransparentBlt(srcDC, left, 330 - img.getheight(), img.getwidth(), img.getheight(), barDC, 0, 0, img.getwidth(), img.getheight(), RGB(17, 17, 102));//设置透明色
+		left -= speed;
+		right = left + img.getwidth();
+
+		if (left <= -5000 - r)
+		{
+			left = 640;
+			r = rand() % 800;
+		}
+	}
+	void crash(dinosaur d1)
+	{
+		if (120 - d1.gety() - d1.geth() < height)
+			if (20 < right&&left < d1.getw() - 20)
+			{
+				gamemode = type;
+				start = clock();
+				left = -50;
+			}
+		if (gamemode == 1)			//中毒状态
+		{
+			TCHAR t[5] = { 0 };
+			int time = (int)(clock() - start) / CLOCKS_PER_SEC;
+			settextcolor(RED);
+			settextstyle(35, 0, _T("微软雅黑"));
+			outtextxy(350, 370, _T("☠"));
+			_stprintf_s(t, _T("%d"), 5 - time);
+			settextstyle(28, 0, _T("微软雅黑"));
+			outtextxy(390, 375, t);
+			if (time >= 5)
+			{
+				gamemode = 0;
+				cleardevice();
+				rebuild();
+			}
+		}
+		if (gamemode == 2)			//无敌状态
+		{
+			TCHAR t[5] = { 0 };
+			int time = (int)(clock() - start) / CLOCKS_PER_SEC;
+			settextcolor(0x00f1ff);
+			settextstyle(35, 0, _T("微软雅黑"));
+			outtextxy(350, 390, _T("★"));
+			_stprintf_s(t, _T("%d"), 5 - time);
+			settextstyle(28, 0, _T("微软雅黑"));
+			outtextxy(390, 395, t);
+			if (time >= 5)
+			{
+				gamemode = 0;
+				cleardevice();
+				rebuild();
+			}
+		}
+	}
+
+};
 /*********************************** 函数 *********************************************/
 
 //显示分数
@@ -275,23 +367,24 @@ void score(double s)
 	outtextxy(20, 10, _T("HI:"));
 	outtextxy(80, 10, ms);
 	_stprintf_s(cnt, _T("%d"), fire_cnt);
-	settextstyle(20, 0, _T("微软雅黑"));
-	outtextxy(35, 379, _T("剩余弹药："));
-	outtextxy(100, 380, cnt);
+	settextstyle(35, 0, _T("微软雅黑"));
+	outtextxy(35, 374, _T("☀"));
+	settextstyle(25, 0, _T("微软雅黑"));
+	outtextxy(75, 380, cnt);
 }
 
 //初始化
 void init()
 {
-	initgraph(640, 480);							// 窗口初始化大小
+
+	FlushConsoleInputBuffer(GetStdHandle(STD_INPUT_HANDLE));	//清除按键缓存
 	SetWindowText(GetHWnd(), _T("HappyDinosaur"));	// 设置窗口标题文字
 	setbkcolor(WHITE);								// 设置背景颜色
 	cleardevice();
 	srand(time(0));									// 设置随机种子
 	loadimage(&backimg, _T("IMAGE"), _T("background"));//加载背景图
 
-	settextstyle(25, 0, _T("黑体"));	// 字体样式大小
-	settextcolor(BLUE);					// 设置字体颜色
+
 	ss = 0;
 	keydown = '`';
 	keydown2 = '`';
@@ -319,12 +412,18 @@ void login()
 			solidrectangle(240, 100, 380, 150);
 			solidrectangle(240, 160, 380, 210);
 
-			settextcolor(BLUE);
+			settextstyle(25, 0, _T("黑体"));	// 字体样式大小
+			settextcolor(BLUE);					// 设置字体颜色
 			outtextxy(260, 113, _T("开始游戏"));
 			outtextxy(260, 173, _T("退出游戏"));
 			outtextxy(260, 233, _T("游戏说明"));
+			settextstyle(25, 0, _T("微软雅黑"));
 
-			if (_kbhit())keydown = _getch();
+			settextcolor(0x4169ec);
+			if (gamemode)outtextxy(500, 170, _T("挑战模式"));
+			else outtextxy(500, 170, _T("休闲模式"));
+
+			if (_kbhit())keydown = _getch();	//按空格开始
 			if (keydown == ' ')
 			{
 				cleardevice();
@@ -342,7 +441,7 @@ void login()
 					game();
 				}
 			}
-			else if (m.x >= 240 && m.x <= 380 && m.y >= 160 && m.y <= 210)	//[退出游戏]
+			else if (m.x >= 240 && m.x <= 380 && m.y >= 165 && m.y <= 210)	//[退出游戏]
 			{
 				setlinecolor(RED);			// 选中框框线条颜色
 				rectangle(235, 155, 385, 215);
@@ -367,13 +466,28 @@ void login()
 				rectangle(235, 95, 385, 155);
 				rectangle(235, 155, 385, 215);
 			}
+
+			if (m.x >= 500 && m.x <= 580 && m.y >= 170 && m.y <= 192)
+			{
+				settextcolor(CYAN);
+				if (gamemode)outtextxy(500, 170, _T("挑战模式"));
+				else outtextxy(500, 170, _T("休闲模式"));
+				if (m.uMsg == WM_LBUTTONDOWN)
+				{
+					gamemode = gamemode ? 0 : 1;
+					m.uMsg = 0;
+				}
+			}
+
+
 			settextcolor(WHITE);
 			if (flag)
 			{
 				settextcolor(CYAN);
 			}
 
-			outtextxy(110, 380, _T("按W或空格跳跃，按S快速下降，按J攻击"));
+			outtextxy(125, 380, _T("按W或空格跳跃，按S快速下降，按J攻击"));
+			outtextxy(125, 410, _T("☠ 中毒：操作反向； ★ 进入无敌状态"));
 			FlushBatchDraw();
 			Sleep(5);
 		}
@@ -397,6 +511,7 @@ void game()
 	HDC aaaDC = GetImageHDC(&dino[1]);   //图片句柄
 	barrier bar1(0);
 	barrier bar2(500);
+	item t1;
 	start = clock();
 	BeginBatchDraw();
 
@@ -414,10 +529,16 @@ void game()
 				{
 				case 'w':
 				case ' ':
-					keydown = 'w';
+					if (t1.gamemode == 1)
+						keydown = 's';
+					else
+						keydown = 'w';
 					break;
 				case 's':
-					keydown = 's';
+					if (t1.gamemode == 1)
+						keydown = 'w';
+					else
+						keydown = 's';
 					break;
 				case 'j':
 					keydown2 = 'j';
@@ -441,10 +562,10 @@ void game()
 					f1.flag = 1;
 				}
 				else if (!f2.flag)
-					{
-						f2.sety(265 + d1.gety());
-						f2.flag = 1;
-					}
+				{
+					f2.sety(265 + d1.gety());
+					f2.flag = 1;
+				}
 				else if (!f3.flag)
 				{
 					f3.sety(265 + d1.gety());
@@ -459,13 +580,31 @@ void game()
 
 			TransparentBlt(srcDC, 10, 230 + d1.gety(), dino[1].getwidth(), dino[1].getheight(), aaaDC, 0, 0, dino[1].getwidth(), dino[1].getheight(), RGB(17, 17, 102));//设置透明色
 			n = -i / 40 % 2 + 1;		//小恐龙贴图切换
+
+			if (t1.gamemode == 1 && n == 2)	//中毒状态
+			{
+				n = 4;
+			}
+			if (t1.gamemode == 2 && n == 1)	//中毒状态
+			{
+				n = 5;
+			}
+
 			bar1.create(speed);
 			bar2.create(speed);
 			bird1.show();
+			if (gamemode)
+				t1.create(speed);
 
-			bar1.crash(d1);				//障碍物碰撞检测
-			bar2.crash(d1);				//障碍物碰撞检测
-			bird1.crash(d1);			//小鸟碰撞检测
+			if (t1.gamemode != 2)
+			{
+				bar1.crash(d1);				//障碍物1碰撞检测
+				bar2.crash(d1);				//障碍物2碰撞检测
+				bird1.crash(d1);			//小鸟碰撞检测
+			}
+			if (gamemode)
+				t1.crash(d1);					//道具检测
+
 			bird1.kill(f1);				//小鸟击中检测
 			bird1.kill(f2);
 			bird1.kill(f3);
@@ -493,10 +632,11 @@ void game_over()
 {
 	EndBatchDraw();
 	keydown2 = '`';
-	
+
 	if (ss / 20 > max_s)
 	{
 		max_s = ss / 20;
+		settextcolor(DARKGRAY);
 		settextstyle(25, 0, _T("黑体"));
 		outtextxy(250, 240, _T("NEW RECORD!"));
 	}
@@ -515,7 +655,7 @@ void game_over()
 		Sleep(200);
 		if (_kbhit())break;
 	}
-	
+
 	init();
 	login();
 }
@@ -524,7 +664,7 @@ void game_over()
 
 void main()
 {
+	initgraph(640, 480);							// 窗口初始化大小
 	init();
 	login();
-
 }
