@@ -1,7 +1,7 @@
 /*****************************************
 HappyDinosaur by LZY
 compiled by VS2015 using EasyX(20180727)
-Last edited:  2018/12/02
+Last edited:  2018/12/08
 *****************************************/
 #include <graphics.h>
 #include <conio.h>
@@ -9,7 +9,6 @@ Last edited:  2018/12/02
 #include <fstream>
 #include"resource.h"
 #pragma comment(lib, "Msimg32.lib")
-
 
 IMAGE backimg, dino[6];
 char keydown;		//键值
@@ -115,18 +114,16 @@ public:
 		type = rand() % 3;
 		img = barri[type];
 		left = 640 + x;
-
 		height = img.getheight();
-		x += 60;
 	}
 	void create(double speed)
 	{
 
 		HDC srcDC = GetImageHDC();           //窗口句柄
 		HDC barDC = GetImageHDC(&img);
-		TransparentBlt(srcDC, left, 330 - img.getheight(), img.getwidth(), img.getheight(), barDC, 0, 0, img.getwidth(), img.getheight(), RGB(17, 17, 102));//设置透明色
+		TransparentBlt(srcDC, (int)left, 330 - img.getheight(), img.getwidth(), img.getheight(), barDC, 0, 0, img.getwidth(), img.getheight(), RGB(17, 17, 102));//设置透明色
 		left -= speed;
-		right = left + img.getwidth();
+		right = (int)left + img.getwidth();
 		r = rand() % 80;
 		if (left <= -460)rebuild(r - 30);
 	}
@@ -140,7 +137,6 @@ public:
 				TransparentBlt(srcDC, 10, 230 + d1.gety(), dino[1].getwidth(), dino[1].getheight(), aaaDC, 0, 0, dino[1].getwidth(), dino[1].getheight(), RGB(17, 17, 102));//设置透明色
 				game_over();
 			}
-
 	}
 };
 
@@ -165,7 +161,6 @@ public:
 	}
 	void fire()
 	{
-
 		HDC srcDC = GetImageHDC();           //窗口句柄
 		HDC ballDC = GetImageHDC(&img);
 		TransparentBlt(srcDC, x, y, img.getwidth(), img.getheight(), ballDC, 0, 0, img.getwidth(), img.getheight(), RGB(17, 17, 102));//设置透明色
@@ -277,7 +272,7 @@ public:
 	item()
 	{
 		rebuild();
-		left = -50;
+		left = -100;
 		height = img.getheight();
 		gamemode = 0;
 	}
@@ -294,9 +289,9 @@ public:
 
 		HDC srcDC = GetImageHDC();           //窗口句柄
 		HDC barDC = GetImageHDC(&img);
-		TransparentBlt(srcDC, left, 330 - img.getheight(), img.getwidth(), img.getheight(), barDC, 0, 0, img.getwidth(), img.getheight(), RGB(17, 17, 102));//设置透明色
+		TransparentBlt(srcDC, (int)left, 330 - img.getheight(), img.getwidth(), img.getheight(), barDC, 0, 0, img.getwidth(), img.getheight(), RGB(17, 17, 102));//设置透明色
 		left -= speed;
-		right = left + img.getwidth();
+		right = (int)left + img.getwidth();
 
 		if (left <= -5000 - r)
 		{
@@ -381,7 +376,7 @@ void init()
 	SetWindowText(GetHWnd(), _T("HappyDinosaur"));	// 设置窗口标题文字
 	setbkcolor(WHITE);								// 设置背景颜色
 	cleardevice();
-	srand(time(0));									// 设置随机种子
+	srand((unsigned int)time(0));									// 设置随机种子
 	loadimage(&backimg, _T("IMAGE"), _T("background"));//加载背景图
 
 
@@ -573,9 +568,7 @@ void game()
 				}
 				keydown2 = '`';
 			}
-			if (f1.flag)f1.fire();
-			if (f2.flag)f2.fire();
-			if (f3.flag)f3.fire();
+			
 			aaaDC = GetImageHDC(&dino[n]);
 
 			TransparentBlt(srcDC, 10, 230 + d1.gety(), dino[1].getwidth(), dino[1].getheight(), aaaDC, 0, 0, dino[1].getwidth(), dino[1].getheight(), RGB(17, 17, 102));//设置透明色
@@ -592,9 +585,23 @@ void game()
 
 			bar1.create(speed);
 			bar2.create(speed);
-			bird1.show();
-			if (gamemode)
+			
+			if (gamemode)					//*模式切换
+			{
+				if (f1.flag)f1.fire();
+				if (f2.flag)f2.fire();
+				if (f3.flag)f3.fire();
+
+				bird1.show();
 				t1.create(speed);
+				t1.crash(d1);					//道具检测
+
+				bird1.kill(f1);				//小鸟击中检测
+				bird1.kill(f2);
+				bird1.kill(f3);
+
+				fire_cnt = !f1.flag + !f2.flag + !f3.flag;
+			}
 
 			if (t1.gamemode != 2)
 			{
@@ -602,29 +609,17 @@ void game()
 				bar2.crash(d1);				//障碍物2碰撞检测
 				bird1.crash(d1);			//小鸟碰撞检测
 			}
-			if (gamemode)
-				t1.crash(d1);					//道具检测
-
-			bird1.kill(f1);				//小鸟击中检测
-			bird1.kill(f2);
-			bird1.kill(f3);
-
-			fire_cnt = !f1.flag + !f2.flag + !f3.flag;
-
+			
 			nowtime = (clock() - start) / CLOCKS_PER_SEC;
 			ss += 1;
 			score(ss);					//显示分数
 
-
 			FlushBatchDraw();
 			Sleep(5);
-
-
 		}
 		if ((int)(nowtime * 10) % 30 == 0)	//每三秒加速0.3
 			speed += 0.3;
 	}
-
 }
 
 //游戏结束
@@ -659,8 +654,6 @@ void game_over()
 	init();
 	login();
 }
-
-
 
 void main()
 {
